@@ -1,21 +1,10 @@
 -- GWL NEXO 2.0 - versão 80 - esquema MySQL/MariaDB para instalação nova.
 
 -- Não inclui registros ou anexos do ambiente Sites. Não contém DROP TABLE.
+-- Tabelas referenciadas são criadas antes das tabelas que dependem delas.
+-- A importação não precisa desativar a validação de chaves estrangeiras.
 
 SET NAMES utf8mb4;
-
-SET FOREIGN_KEY_CHECKS=0;
-
-CREATE TABLE IF NOT EXISTS `contract_activity` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `contract_id` INTEGER NOT NULL,
-  `reference_month` LONGTEXT,
-  `actor` LONGTEXT NOT NULL,
-  `description` LONGTEXT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  KEY `contract_activity_contract_idx` (`contract_id`),
-  FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `contract_catalog` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -26,6 +15,17 @@ CREATE TABLE IF NOT EXISTS `contract_catalog` (
   `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   KEY `contract_catalog_responsible_idx` (`responsible`),
   UNIQUE KEY `contract_catalog_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS `contract_activity` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `contract_id` INTEGER NOT NULL,
+  `reference_month` LONGTEXT,
+  `actor` LONGTEXT NOT NULL,
+  `description` LONGTEXT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  KEY `contract_activity_contract_idx` (`contract_id`),
+  FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `contract_competencies` (
@@ -42,16 +42,6 @@ CREATE TABLE IF NOT EXISTS `contract_competencies` (
   FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
-CREATE TABLE IF NOT EXISTS `contract_events` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `contract_id` INTEGER NOT NULL,
-  `actor` LONGTEXT NOT NULL,
-  `description` LONGTEXT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  KEY `events_contract_idx` (`contract_id`),
-  FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
 CREATE TABLE IF NOT EXISTS `contracts` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `name` VARCHAR(191) NOT NULL,
@@ -66,6 +56,16 @@ CREATE TABLE IF NOT EXISTS `contracts` (
   KEY `contracts_month_idx` (`reference_month`),
   KEY `contracts_responsible_idx` (`responsible`),
   UNIQUE KEY `contracts_name_month_unique` (`name`,`reference_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS `contract_events` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `contract_id` INTEGER NOT NULL,
+  `actor` LONGTEXT NOT NULL,
+  `description` LONGTEXT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  KEY `events_contract_idx` (`contract_id`),
+  FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `planner_boards` (
@@ -126,17 +126,12 @@ CREATE TABLE IF NOT EXISTS `planner_links` (
   KEY `planner_links_owner_idx` (`owner_email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
-CREATE TABLE IF NOT EXISTS `planner_message_attachments` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `message_id` INTEGER NOT NULL,
-  `file_name` LONGTEXT NOT NULL,
-  `object_key` VARCHAR(191) NOT NULL,
-  `content_type` LONGTEXT NOT NULL DEFAULT ('application/octet-stream'),
-  `size` INTEGER NOT NULL DEFAULT 0,
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  KEY `planner_message_attachments_message_idx` (`message_id`),
-  UNIQUE KEY `planner_message_attachments_object_key_unique` (`object_key`),
-  FOREIGN KEY (`message_id`) REFERENCES `planner_messages` (`id`) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `planner_threads` (
+  `id` VARCHAR(191) PRIMARY KEY,
+  `title` LONGTEXT NOT NULL,
+  `kind` LONGTEXT NOT NULL DEFAULT ('group'),
+  `created_by` LONGTEXT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `planner_messages` (
@@ -149,6 +144,19 @@ CREATE TABLE IF NOT EXISTS `planner_messages` (
   KEY `planner_messages_thread_id_idx` (`thread_id`,`id`),
   KEY `planner_messages_thread_date_idx` (`thread_id`,`created_at`),
   FOREIGN KEY (`thread_id`) REFERENCES `planner_threads` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS `planner_message_attachments` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `message_id` INTEGER NOT NULL,
+  `file_name` LONGTEXT NOT NULL,
+  `object_key` VARCHAR(191) NOT NULL,
+  `content_type` LONGTEXT NOT NULL DEFAULT ('application/octet-stream'),
+  `size` INTEGER NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  KEY `planner_message_attachments_message_idx` (`message_id`),
+  UNIQUE KEY `planner_message_attachments_object_key_unique` (`object_key`),
+  FOREIGN KEY (`message_id`) REFERENCES `planner_messages` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `planner_tasks` (
@@ -194,12 +202,66 @@ CREATE TABLE IF NOT EXISTS `planner_thread_reads` (
   FOREIGN KEY (`thread_id`) REFERENCES `planner_threads` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
-CREATE TABLE IF NOT EXISTS `planner_threads` (
-  `id` VARCHAR(191) PRIMARY KEY,
-  `title` LONGTEXT NOT NULL,
-  `kind` LONGTEXT NOT NULL DEFAULT ('group'),
-  `created_by` LONGTEXT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+CREATE TABLE IF NOT EXISTS `ponto_sites` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `name` LONGTEXT NOT NULL,
+  `contract` LONGTEXT NOT NULL DEFAULT (''),
+  `city` LONGTEXT NOT NULL DEFAULT (''),
+  `responsible` LONGTEXT NOT NULL DEFAULT (''),
+  `latitude` LONGTEXT NOT NULL DEFAULT (''),
+  `longitude` LONGTEXT NOT NULL DEFAULT (''),
+  `radius_meters` INTEGER NOT NULL DEFAULT 300,
+  `status` VARCHAR(191) NOT NULL DEFAULT 'active',
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `company` LONGTEXT NOT NULL DEFAULT ('Dimivig Segurança'),
+  `cnpj` LONGTEXT NOT NULL DEFAULT (''),
+  `site_type` LONGTEXT NOT NULL DEFAULT ('Armado'),
+  `phone` LONGTEXT NOT NULL DEFAULT (''),
+  `email` LONGTEXT NOT NULL DEFAULT (''),
+  `address` LONGTEXT NOT NULL DEFAULT (''),
+  `address_number` LONGTEXT NOT NULL DEFAULT (''),
+  `zip_code` LONGTEXT NOT NULL DEFAULT (''),
+  `rotating` INTEGER NOT NULL DEFAULT false,
+  `require_photo` INTEGER NOT NULL DEFAULT true,
+  `require_geo` INTEGER NOT NULL DEFAULT true,
+  `notes` LONGTEXT NOT NULL DEFAULT (''),
+  `source_system` VARCHAR(191),
+  `source_id` VARCHAR(191),
+  UNIQUE KEY `ponto_sites_source_unique` (`source_system`,`source_id`),
+  KEY `ponto_sites_status_idx` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+CREATE TABLE IF NOT EXISTS `ponto_employees` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `name` LONGTEXT NOT NULL,
+  `registration` VARCHAR(191) NOT NULL,
+  `cpf` LONGTEXT NOT NULL DEFAULT (''),
+  `job_title` LONGTEXT NOT NULL DEFAULT ('Vigilante'),
+  `site_id` INTEGER,
+  `schedule` LONGTEXT NOT NULL DEFAULT ('12x36'),
+  `email` LONGTEXT NOT NULL DEFAULT (''),
+  `phone` LONGTEXT NOT NULL DEFAULT (''),
+  `status` VARCHAR(191) NOT NULL DEFAULT 'active',
+  `require_photo` INTEGER NOT NULL DEFAULT true,
+  `require_geo` INTEGER NOT NULL DEFAULT true,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `admission_date` LONGTEXT NOT NULL DEFAULT (''),
+  `journey_start_date` LONGTEXT NOT NULL DEFAULT (''),
+  `ctps_number` LONGTEXT NOT NULL DEFAULT (''),
+  `ctps_series` LONGTEXT NOT NULL DEFAULT (''),
+  `pis_pasep` LONGTEXT NOT NULL DEFAULT (''),
+  `expected_start` LONGTEXT NOT NULL DEFAULT ('06:00'),
+  `expected_break_start` LONGTEXT NOT NULL DEFAULT ('12:00'),
+  `expected_break_end` LONGTEXT NOT NULL DEFAULT ('13:00'),
+  `expected_end` LONGTEXT NOT NULL DEFAULT ('18:00'),
+  `registers_point` INTEGER NOT NULL DEFAULT true,
+  `source_system` VARCHAR(191),
+  `source_id` VARCHAR(191),
+  KEY `ponto_employee_registration_idx` (`registration`),
+  UNIQUE KEY `ponto_employee_source_unique` (`source_system`,`source_id`),
+  KEY `ponto_employee_status_idx` (`status`),
+  KEY `ponto_employee_site_idx` (`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `ponto_access_profiles` (
@@ -287,39 +349,6 @@ CREATE TABLE IF NOT EXISTS `ponto_documents` (
   UNIQUE KEY `ponto_documents_object_key_unique` (`object_key`),
   FOREIGN KEY (`site_id`) REFERENCES `ponto_sites` (`id`) ON DELETE SET NULL,
   FOREIGN KEY (`employee_id`) REFERENCES `ponto_employees` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
-CREATE TABLE IF NOT EXISTS `ponto_employees` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `name` LONGTEXT NOT NULL,
-  `registration` VARCHAR(191) NOT NULL,
-  `cpf` LONGTEXT NOT NULL DEFAULT (''),
-  `job_title` LONGTEXT NOT NULL DEFAULT ('Vigilante'),
-  `site_id` INTEGER,
-  `schedule` LONGTEXT NOT NULL DEFAULT ('12x36'),
-  `email` LONGTEXT NOT NULL DEFAULT (''),
-  `phone` LONGTEXT NOT NULL DEFAULT (''),
-  `status` VARCHAR(191) NOT NULL DEFAULT 'active',
-  `require_photo` INTEGER NOT NULL DEFAULT true,
-  `require_geo` INTEGER NOT NULL DEFAULT true,
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `admission_date` LONGTEXT NOT NULL DEFAULT (''),
-  `journey_start_date` LONGTEXT NOT NULL DEFAULT (''),
-  `ctps_number` LONGTEXT NOT NULL DEFAULT (''),
-  `ctps_series` LONGTEXT NOT NULL DEFAULT (''),
-  `pis_pasep` LONGTEXT NOT NULL DEFAULT (''),
-  `expected_start` LONGTEXT NOT NULL DEFAULT ('06:00'),
-  `expected_break_start` LONGTEXT NOT NULL DEFAULT ('12:00'),
-  `expected_break_end` LONGTEXT NOT NULL DEFAULT ('13:00'),
-  `expected_end` LONGTEXT NOT NULL DEFAULT ('18:00'),
-  `registers_point` INTEGER NOT NULL DEFAULT true,
-  `source_system` VARCHAR(191),
-  `source_id` VARCHAR(191),
-  KEY `ponto_employee_registration_idx` (`registration`),
-  UNIQUE KEY `ponto_employee_source_unique` (`source_system`,`source_id`),
-  KEY `ponto_employee_status_idx` (`status`),
-  KEY `ponto_employee_site_idx` (`site_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `ponto_justifications` (
@@ -411,35 +440,6 @@ CREATE TABLE IF NOT EXISTS `ponto_sessions` (
   FOREIGN KEY (`credential_id`) REFERENCES `ponto_credentials` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
-CREATE TABLE IF NOT EXISTS `ponto_sites` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `name` LONGTEXT NOT NULL,
-  `contract` LONGTEXT NOT NULL DEFAULT (''),
-  `city` LONGTEXT NOT NULL DEFAULT (''),
-  `responsible` LONGTEXT NOT NULL DEFAULT (''),
-  `latitude` LONGTEXT NOT NULL DEFAULT (''),
-  `longitude` LONGTEXT NOT NULL DEFAULT (''),
-  `radius_meters` INTEGER NOT NULL DEFAULT 300,
-  `status` VARCHAR(191) NOT NULL DEFAULT 'active',
-  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `company` LONGTEXT NOT NULL DEFAULT ('Dimivig Segurança'),
-  `cnpj` LONGTEXT NOT NULL DEFAULT (''),
-  `site_type` LONGTEXT NOT NULL DEFAULT ('Armado'),
-  `phone` LONGTEXT NOT NULL DEFAULT (''),
-  `email` LONGTEXT NOT NULL DEFAULT (''),
-  `address` LONGTEXT NOT NULL DEFAULT (''),
-  `address_number` LONGTEXT NOT NULL DEFAULT (''),
-  `zip_code` LONGTEXT NOT NULL DEFAULT (''),
-  `rotating` INTEGER NOT NULL DEFAULT false,
-  `require_photo` INTEGER NOT NULL DEFAULT true,
-  `require_geo` INTEGER NOT NULL DEFAULT true,
-  `notes` LONGTEXT NOT NULL DEFAULT (''),
-  `source_system` VARCHAR(191),
-  `source_id` VARCHAR(191),
-  UNIQUE KEY `ponto_sites_source_unique` (`source_system`,`source_id`),
-  KEY `ponto_sites_status_idx` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
 CREATE TABLE IF NOT EXISTS `ponto_timesheet_signatures` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `employee_id` INTEGER NOT NULL,
@@ -453,16 +453,6 @@ CREATE TABLE IF NOT EXISTS `ponto_timesheet_signatures` (
   KEY `ponto_signature_period_idx` (`start_date`,`end_date`),
   UNIQUE KEY `ponto_signature_employee_period_unique` (`employee_id`,`start_date`,`end_date`),
   FOREIGN KEY (`employee_id`) REFERENCES `ponto_employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
-CREATE TABLE IF NOT EXISTS `result_archive_contracts` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `result_id` INTEGER NOT NULL,
-  `contract_id` INTEGER NOT NULL,
-  KEY `result_archive_contract_result_idx` (`result_id`),
-  UNIQUE KEY `result_archive_contract_unique` (`result_id`,`contract_id`),
-  FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`result_id`) REFERENCES `result_archives` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `result_archives` (
@@ -482,6 +472,16 @@ CREATE TABLE IF NOT EXISTS `result_archives` (
   FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
+CREATE TABLE IF NOT EXISTS `result_archive_contracts` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `result_id` INTEGER NOT NULL,
+  `contract_id` INTEGER NOT NULL,
+  KEY `result_archive_contract_result_idx` (`result_id`),
+  UNIQUE KEY `result_archive_contract_unique` (`result_id`,`contract_id`),
+  FOREIGN KEY (`contract_id`) REFERENCES `contract_catalog` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`result_id`) REFERENCES `result_archives` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
 CREATE TABLE IF NOT EXISTS hostinger_install_state (id INTEGER PRIMARY KEY, installed INTEGER NOT NULL DEFAULT 0) ENGINE=InnoDB;
 
 INSERT IGNORE INTO hostinger_install_state (id,installed) VALUES (1,0);
@@ -491,5 +491,3 @@ CREATE TABLE IF NOT EXISTS hostinger_email_verifications (token_hash CHAR(64) PR
 CREATE TABLE IF NOT EXISTS hostinger_objects (id CHAR(64) PRIMARY KEY, object_key LONGTEXT NOT NULL, version_id CHAR(36) NOT NULL, size BIGINT NOT NULL, etag CHAR(64) NOT NULL, http_metadata LONGTEXT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS hostinger_object_chunks (version_id CHAR(36) NOT NULL, chunk_index INTEGER NOT NULL, data LONGBLOB NOT NULL, PRIMARY KEY(version_id,chunk_index)) ENGINE=InnoDB;
-
-SET FOREIGN_KEY_CHECKS=1;

@@ -1,0 +1,77 @@
+GWL NEXO 2.0 — PACOTE PARA HOSTINGER
+
+Este ZIP funciona como uma Aplicação Node.js com MySQL/MariaDB.
+Para implantar pelo GitHub, selecione o repositório dimivigia-dev/gwl-nexo,
+branch main. Consulte README.md para o passo a passo dessa opção.
+No hPanel, use Sites > Adicionar site > Aplicação Node.js > Enviar arquivos.
+Escolha Node.js 24 e envie o ZIP inteiro. O arquivo package.json está na raiz.
+Não instale este pacote apenas extraindo os arquivos em public_html: as APIs
+precisam do servidor Node.js.
+
+1. Crie um banco MySQL/MariaDB e um usuário no hPanel.
+2. Abra o phpMyAdmin desse banco e importe:
+   banco_sql/GWL_NEXO_estrutura.sql
+3. Cadastre as variáveis abaixo na configuração da aplicação:
+   APP_URL: endereço completo do site com HTTPS, sem barra final.
+   DB_HOST: endereço do servidor do banco informado pela Hostinger.
+   DB_PORT: normalmente 3306.
+   DB_NAME: nome do banco criado.
+   DB_USER: usuário do banco.
+   DB_PASSWORD: senha desse usuário.
+   OWNER_EMAIL: e-mail do administrador principal; padrão dimivigia@gmail.com.
+   INSTALL_TOKEN: código aleatório criado por você, com pelo menos 32 caracteres.
+   DB_SSL: false para conexão local; true quando o banco exigir TLS.
+4. Configure a aplicação:
+   Tipo/framework: Other (Outros), se não for identificado automaticamente.
+   Diretório do projeto: raiz do ZIP.
+   Versão Node.js: 24.x.
+   Comando de build: npm run build.
+   Comando de início: npm start.
+   Arquivo de entrada, se solicitado: server.mjs.
+   Não selecione publicação apenas estática.
+5. Publique a aplicação e abra https://SEU-DOMINIO/instalar.
+6. Informe o nome do administrador, o INSTALL_TOKEN configurado e uma senha
+   entre 10 e 128 caracteres. Confirme a senha. A ativação é feita uma única vez.
+7. Entre no GWL Flow com o OWNER_EMAIL e a senha que você acabou de definir.
+   Essa conta também acessa a administração do Ponto DIMIVIG e o GWL Planner.
+
+O QUE ESTÁ INCLUÍDO
+- Portal GWL NEXO, GWL Flow, Ponto DIMIVIG, GWL Planner e Sobre nós.
+- Interfaces compiladas, imagens, logos, mascote e processamento de PDFs/Excel.
+- Servidor independente para a Hostinger, APIs e autenticação por e-mail/senha.
+- Contratos com CC + Comprovante, Vale-Alimentação, FGTS e Folha de Ponto.
+- Acompanhamento mensal e progresso 4/4; Gustavo como responsável disponível.
+- Estrutura SQL completa e armazenamento de novos anexos no próprio banco.
+- Código-fonte e arquivos necessários para futuras modificações.
+
+DADOS DO AMBIENTE ATUAL
+O SQL incluído cria a estrutura para uma instalação NOVA. O ZIP não contém
+os contratos, perfis, batidas, históricos, assinaturas, fotos ou anexos já
+armazenados no ambiente Sites. Nenhum dado do ambiente atual foi alterado.
+Uma transferência desses registros e anexos exige uma exportação específica.
+Logins existentes no Sites não são automaticamente transferidos para este ZIP.
+
+CADASTRO PÚBLICO NO PLANNER
+Para confirmar o e-mail de novos usuários, configure SMTP_HOST, SMTP_PORT,
+SMTP_SECURE, SMTP_USER, SMTP_PASSWORD e SMTP_FROM. Use as credenciais de um
+serviço de e-mail autorizado. Sem SMTP, o administrador ainda pode cadastrar
+os acessos; o cadastro público informa que o envio ainda não está configurado.
+Não existe senha administrativa padrão no pacote.
+
+MANUTENÇÃO
+Todos os registros e novos anexos são gravados no banco configurado.
+Faça backup periódico desse banco; ele contém também os novos arquivos.
+Em um VPS, copie .env.example para .env e preencha os valores antes de npm start.
+No hPanel, prefira as variáveis da aplicação; não envie senhas no código-fonte.
+Para alterar e recompilar o código: npm install --include=dev; npm run rebuild.
+O comando normal npm run build verifica os arquivos que já estão compilados.
+
+REQUISITOS E REFERÊNCIAS
+Node.js 24; banco MariaDB 10.6+ ou MySQL 8.0.13+; domínio com HTTPS.
+Guia oficial de upload ZIP:
+https://www.hostinger.com/support/how-to-migrate-a-node-js-application-to-hostinger/
+Guia de criação da aplicação:
+https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/
+
+Base: GWL NEXO 2.0, versão 80, de 30/09/2026.
+As modificações do GWL Flow desta versão estão incluídas.

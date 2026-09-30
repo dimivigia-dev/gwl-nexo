@@ -1,0 +1,22 @@
+<svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold" x1="36" y1="21" x2="202" y2="151" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC45B"/>
+      <stop offset="0.46" stop-color="#F2A12D"/>
+      <stop offset="1" stop-color="#D97A12"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="120" y1="25" x2="120" y2="151" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE39E" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#F3A02C" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="8" y="4" width="224" height="169" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#C66B0A" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M120 16L132 33L120 51L108 33L120 16Z" fill="url(#gold)"/>
+    <path d="M19 61L49 41L120 82L191 41L221 61L120 119L19 61Z" fill="url(#gold)"/>
+    <path d="M80 119L120 159L160 119L148 112L120 140L92 112L80 119Z" fill="url(#gold)"/>
+    <path d="M49 41L120 82L191 41" stroke="url(#edge)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

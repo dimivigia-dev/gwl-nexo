@@ -1,0 +1,33 @@
+{
+  "name": "gwl-nexo-hostinger",
+  "version": "2.0.80",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "build": "node scripts/verify-package.mjs",
+    "rebuild": "node scripts/rebuild.mjs"
+  },
+  "dependencies": {
+    "mysql2": "3.24.5",
+    "nodemailer": "10.0.13"
+  },
+  "devDependencies": {
+    "drizzle-orm": "0.45.2",
+    "jszip": "^3.10.1",
+    "next": "16.2.6",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.149",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "xlsx": "^0.18.5",
+    "esbuild": "0.28.2",
+    "vite": "8.0.13",
+    "@vitejs/plugin-react": "6.0.2",
+    "@tailwindcss/postcss": "4.2.1",
+    "typescript": "5.9.3"
+  }
+}

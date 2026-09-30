@@ -1,0 +1,105 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
+import BackButton from '@/components/common/BackButton';
+import ImportDataPanel from '@/components/admin/ImportDataPanel';
+import { Boxes, Building2, ChevronRight, Database, ListChecks, Plus, Save, ShieldCheck, UploadCloud, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { createPonto, loadPonto, updatePonto } from '@/services/pontoApi';
+import { useToast } from '@/components/ui/use-toast';
+
+const fieldClass = 'w-full bg-[#1a1a1a] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:border-[#ff8c00] outline-none';
+
+const CadastrosGerais = () => {
+  const { toast } = useToast();
+  const [data, setData] = useState({ profiles: [], employees: [], sites: [], assets: [], occurrenceTypes: [] });
+  const [section, setSection] = useState('estrutura');
+  const [profileDraft, setProfileDraft] = useState({ name: '', email: '', role: 'Colaborador', employeeId: '', siteId: '', password: '' });
+  const [passwords, setPasswords] = useState({});
+  const [asset, setAsset] = useState({ code: '', name: '', category: 'Equipamento', siteId: '', employeeId: '', quantity: 1, status: 'available', notes: '' });
+  const [occurrence, setOccurrence] = useState({ name: '', category: 'Outros', effect: 'informativo', requiresRelatedEmployee: false });
+  const refresh = async () => { try { setData(await loadPonto()); } catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); } };
+  useEffect(() => { refresh(); }, []);
+
+  const companies = useMemo(() => {
+    const grouped = new Map();
+    data.sites.forEach((site) => {
+      const name = site.company || 'Empresa não informada';
+      const rows = grouped.get(name) || [];
+      rows.push(site);
+      grouped.set(name, rows);
+    });
+    return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [data.sites]);
+
+  const changeProfile = async (profile, changes) => {
+    try { await updatePonto('profile', profile.id, { role: profile.role, employeeId: profile.employee_id, siteId: profile.site_id, status: profile.status, ...changes }); await refresh(); }
+    catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); }
+  };
+  const saveProfile = async () => {
+    try {
+      await createPonto('profile', profileDraft);
+      setProfileDraft({ name: '', email: '', role: 'Colaborador', employeeId: '', siteId: '', password: '' });
+      await refresh();
+      toast({ title: 'Acesso criado', description: 'Entregue a senha provisória ao usuário por um canal seguro. A troca será solicitada no primeiro acesso.' });
+    } catch (error) { toast({ title: 'Não foi possível criar o acesso', description: error.message, variant: 'destructive' }); }
+  };
+  const resetPassword = async (profile) => {
+    const password = passwords[profile.id] || '';
+    if (password.length < 10) return toast({ title: 'Senha muito curta', description: 'Use pelo menos 10 caracteres.', variant: 'destructive' });
+    try {
+      await changeProfile(profile, { password });
+      setPasswords((current) => ({ ...current, [profile.id]: '' }));
+      toast({ title: 'Senha provisória redefinida', description: 'As sessões anteriores foram encerradas.' });
+    } catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); }
+  };
+  const saveAsset = async () => {
+    try { await createPonto('asset', asset); setAsset({ code: '', name: '', category: 'Equipamento', siteId: '', employeeId: '', quantity: 1, status: 'available', notes: '' }); await refresh(); toast({ title: 'Patrimônio cadastrado' }); }
+    catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); }
+  };
+  const updateAsset = async (item, changes) => { try { await updatePonto('asset', item.id, { siteId: item.site_id, employeeId: item.employee_id, quantity: item.quantity, status: item.status, notes: item.notes, ...changes }); await refresh(); } catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); } };
+  const saveOccurrence = async () => { try { await createPonto('occurrenceType', occurrence); setOccurrence({ name: '', category: 'Outros', effect: 'informativo', requiresRelatedEmployee: false }); await refresh(); toast({ title: 'Motivo adicionado' }); } catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); } };
+  const toggleOccurrence = async (item) => { try { await updatePonto('occurrenceType', item.id, { status: item.status === 'active' ? 'inactive' : 'active' }); await refresh(); } catch (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); } };
+
+  const cards = [
+    { id: 'estrutura', icon: Building2, title: 'Empresas e postos', value: companies.length, description: `${data.sites.length} posto(s) vinculados` },
+    { id: 'usuarios', icon: Users, title: 'Acessos e perfis', value: data.profiles.length, description: 'Permissões e vínculos' },
+    { id: 'patrimonio', icon: Boxes, title: 'Patrimônios', value: data.assets.length, description: 'Itens, estoque e responsáveis' },
+    { id: 'motivos', icon: ListChecks, title: 'Motivos de ponto', value: data.occurrenceTypes.filter((item) => item.status === 'active').length, description: 'Catálogo administrável' },
+    { id: 'importar', icon: UploadCloud, title: 'Importar dados', value: 'CSV', description: 'Migração conferida e segura' },
+  ];
+
+  return <><Helmet><title>Cadastros Gerais - Dimivig</title></Helmet><MainLayout><div className="space-y-6">
+    <div><BackButton/><p className="mt-3 text-[11px] font-bold uppercase tracking-[.2em] text-[#ff8c00]">Central administrativa</p><h1 className="mt-1 text-3xl font-bold text-white">Cadastros Gerais</h1><p className="mt-1 max-w-3xl text-sm text-gray-400">Empresas, postos, pessoas, permissões e parâmetros organizados em áreas independentes.</p></div>
+
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">{cards.map((card) => <button type="button" onClick={() => setSection(card.id)} key={card.id} className={`rounded-2xl border p-5 text-left shadow-lg transition hover:-translate-y-0.5 ${section === card.id ? 'border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30' : 'border-gray-800 bg-[#2a2a2a] hover:border-gray-700'}`}><div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl border border-gray-700 bg-[#1a1a1a]"><card.icon className="h-5 w-5 text-[#ff8c00]"/></span><ChevronRight className={`h-4 w-4 ${section === card.id ? 'text-orange-300' : 'text-gray-600'}`}/></div><p className="mt-4 text-3xl font-bold text-white">{card.value}</p><h2 className="mt-1 text-base font-semibold text-white">{card.title}</h2><p className="mt-1 text-xs text-gray-400">{card.description}</p></button>)}</div>
+
+    {section === 'estrutura' && <section className="overflow-hidden rounded-2xl border border-gray-800 bg-[#282828]"><header className="flex flex-col gap-4 border-b border-gray-800 p-5 lg:flex-row lg:items-center lg:justify-between"><div><h2 className="flex items-center gap-2 font-semibold text-white"><Database className="h-5 w-5 text-[#ff8c00]"/>Estrutura da operação</h2><p className="mt-1 text-xs text-gray-500">A empresa agrupa os postos; colaboradores e folhas ficam vinculados ao posto correto.</p></div><div className="flex flex-wrap gap-2"><Link to="/admin/postos-de-servico" className="rounded-lg bg-[#ff8c00] px-4 py-2 text-sm font-bold text-black">Cadastrar posto</Link><Link to="/admin/colaboradores" className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200">Cadastrar colaborador</Link></div></header><div className="grid gap-4 p-5 lg:grid-cols-2">{companies.map(([company, sites]) => <article key={company} className="rounded-xl border border-gray-700 bg-[#212121] p-4"><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-wide text-orange-300">Empresa</p><h3 className="mt-1 text-lg font-bold text-white">{company}</h3></div><span className="rounded-full bg-white/5 px-3 py-1 text-xs text-gray-300">{sites.length} posto(s)</span></div><div className="mt-4 space-y-2">{sites.map((site) => <div key={site.id} className="flex items-center justify-between rounded-lg border border-gray-800 bg-[#191919] p-3"><div className="min-w-0"><strong className="block truncate text-sm text-white">{site.name}</strong><small className="text-gray-500">{site.city || site.address || 'Endereço não informado'}</small></div><div className="ml-3 text-right"><span className={site.status === 'active' ? 'text-xs font-bold text-emerald-300' : 'text-xs font-bold text-red-300'}>{site.status === 'active' ? 'ATIVO' : 'INATIVO'}</span>{(!site.latitude || !site.longitude) && <small className="block text-amber-300">GPS pendente</small>}</div></div>)}</div></article>)}{!companies.length && <div className="col-span-full rounded-xl border border-dashed border-gray-700 p-12 text-center text-gray-500">Cadastre a primeira empresa e seu posto de trabalho.</div>}</div></section>}
+
+    {section === 'importar' && <ImportDataPanel onImported={refresh}/>}
+
+    {section === 'motivos' && <section className="overflow-hidden rounded-2xl border border-gray-800 bg-[#2a2a2a]"><div className="border-b border-gray-800 p-5"><h2 className="flex items-center gap-2 font-semibold text-white"><ListChecks className="h-5 w-5 text-[#ff8c00]"/>Motivos de ocorrência e justificativa</h2><p className="mt-1 text-xs text-gray-500">Permuta exige foto. A indicação do substituto é opcional e, quando usada, troca os plantões após aprovação.</p><div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5"><input value={occurrence.name} onChange={(e) => setOccurrence({...occurrence,name:e.target.value})} placeholder="Novo motivo" className={`md:col-span-2 ${fieldClass}`}/><select value={occurrence.category} onChange={(e) => setOccurrence({...occurrence,category:e.target.value})} className={fieldClass}>{['Marcações','Escala','Saúde','Licenças','Ausências','Ausências legais','Compensação','Folgas','Operação','Outros'].map((item)=><option key={item}>{item}</option>)}</select><select value={occurrence.effect} onChange={(e) => setOccurrence({...occurrence,effect:e.target.value})} className={fieldClass}><option value="informativo">Informativo</option><option value="ponto">Ajuste de ponto</option><option value="abono_total">Abono total</option><option value="abono_parcial">Abono parcial</option><option value="credito">Crédito</option><option value="debito">Débito</option><option value="escala">Altera escala</option></select><Button onClick={saveOccurrence} disabled={!occurrence.name.trim()} className="bg-[#ff8c00] hover:bg-[#e67e00]"><Plus className="mr-2 h-4 w-4"/>Adicionar motivo</Button></div></div><div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 xl:grid-cols-3">{data.occurrenceTypes.map((item)=><article key={item.id} className={`flex items-center gap-3 rounded-lg border p-3 ${item.status==='active'?'border-gray-700 bg-[#222]':'border-gray-800 bg-[#1d1d1d] opacity-55'}`}><span className="grid h-8 w-8 place-items-center rounded-lg bg-orange-500/10 text-xs font-bold text-[#ff9f2e]">{item.sort_order}</span><div className="min-w-0 flex-1"><strong className="block truncate text-sm text-white">{item.name}</strong><small className="text-gray-500">{item.category} · {item.effect.replaceAll('_',' ')}</small></div><button onClick={()=>toggleOccurrence(item)} className={item.status==='active'?'text-xs font-bold text-emerald-300':'text-xs font-bold text-red-300'}>{item.status==='active'?'ATIVO':'INATIVO'}</button></article>)}</div></section>}
+
+    {section === 'usuarios' && <section className="space-y-4">
+      <article className="overflow-hidden rounded-2xl border border-gray-800 bg-[#2a2a2a]">
+        <header className="border-b border-gray-800 p-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-orange-500/10 text-[#ff9f2e]"><Plus className="h-5 w-5"/></span><div><h2 className="font-semibold text-white">Novo acesso ao Ponto DIMIVIG</h2><p className="mt-1 text-xs text-gray-500">Crie credenciais individuais. Colaboradores devem ser vinculados ao cadastro correto.</p></div></div></header>
+        <div className="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-3">
+          <label className="text-xs text-gray-400">Nome<input value={profileDraft.name} onChange={(e)=>setProfileDraft({...profileDraft,name:e.target.value})} className={`mt-1 ${fieldClass}`} placeholder="Nome do usuário"/></label>
+          <label className="text-xs text-gray-400">E-mail / login<input type="email" value={profileDraft.email} onChange={(e)=>setProfileDraft({...profileDraft,email:e.target.value})} className={`mt-1 ${fieldClass}`} placeholder="usuario@dimivig.com.br"/></label>
+          <label className="text-xs text-gray-400">Perfil<select value={profileDraft.role} onChange={(e)=>setProfileDraft({...profileDraft,role:e.target.value})} className={`mt-1 ${fieldClass}`}><option>Administrador</option><option>Fiscal</option><option>Colaborador</option><option>Cliente</option></select></label>
+          <label className="text-xs text-gray-400">Colaborador vinculado<select value={profileDraft.employeeId} onChange={(e)=>setProfileDraft({...profileDraft,employeeId:e.target.value})} className={`mt-1 ${fieldClass}`}><option value="">Sem vínculo</option>{data.employees.map((employee)=><option key={employee.id} value={employee.id}>{employee.name}</option>)}</select></label>
+          <label className="text-xs text-gray-400">Posto / cliente<select value={profileDraft.siteId} onChange={(e)=>setProfileDraft({...profileDraft,siteId:e.target.value})} className={`mt-1 ${fieldClass}`}><option value="">Todos / sem vínculo</option>{data.sites.map((site)=><option key={site.id} value={site.id}>{site.name}</option>)}</select></label>
+          <label className="text-xs text-gray-400">Senha provisória<input type="password" value={profileDraft.password} onChange={(e)=>setProfileDraft({...profileDraft,password:e.target.value})} className={`mt-1 ${fieldClass}`} placeholder="Mínimo de 10 caracteres"/></label>
+        </div>
+        <div className="flex items-center justify-between gap-4 border-t border-gray-800 px-5 py-4"><p className="max-w-2xl text-xs leading-relaxed text-gray-500">A senha é protegida e nunca fica visível. No primeiro acesso, o usuário deverá substituí-la.</p><Button onClick={saveProfile} disabled={!profileDraft.email || profileDraft.password.length < 10} className="bg-[#ff8c00] font-bold text-black hover:bg-[#ff9f2e]"><ShieldCheck className="mr-2 h-4 w-4"/>Criar acesso</Button></div>
+      </article>
+
+      <article className="overflow-hidden rounded-2xl border border-gray-800 bg-[#2a2a2a]"><div className="flex items-center gap-2 border-b border-gray-800 p-5"><ShieldCheck className="h-5 w-5 text-[#ff8c00]"/><div><h2 className="font-semibold text-white">Usuários, vínculos e senhas</h2><p className="mt-1 text-xs text-gray-500">Altere permissões, vincule o colaborador e redefina a senha provisória quando necessário.</p></div></div><div className="overflow-x-auto"><table className="w-full min-w-[1180px] text-left text-sm text-gray-400"><thead className="bg-[#1f1f1f] text-xs uppercase text-gray-500"><tr><th className="px-4 py-3">Usuário</th><th className="px-4 py-3">Perfil</th><th className="px-4 py-3">Colaborador</th><th className="px-4 py-3">Posto</th><th className="px-4 py-3">Nova senha provisória</th><th className="px-4 py-3">Status</th></tr></thead><tbody className="divide-y divide-gray-800">{data.profiles.map((profile) => <tr key={profile.id}><td className="px-4 py-3"><span className="block text-white">{profile.name || profile.email}</span><span className="text-xs">{profile.email}</span></td><td className="px-4 py-3"><select value={profile.role} onChange={(e)=>changeProfile(profile,{role:e.target.value})} className={fieldClass}><option>Administrador</option><option>Fiscal</option><option>Colaborador</option><option>Cliente</option></select></td><td className="px-4 py-3"><select value={profile.employee_id || ''} onChange={(e)=>changeProfile(profile,{employeeId:e.target.value})} className={fieldClass}><option value="">Sem vínculo</option>{data.employees.map((employee)=><option key={employee.id} value={employee.id}>{employee.name}</option>)}</select></td><td className="px-4 py-3"><select value={profile.site_id || ''} onChange={(e)=>changeProfile(profile,{siteId:e.target.value})} className={fieldClass}><option value="">Todos/sem vínculo</option>{data.sites.map((site)=><option key={site.id} value={site.id}>{site.name}</option>)}</select></td><td className="px-4 py-3"><div className="flex min-w-[260px] gap-2"><input type="password" value={passwords[profile.id] || ''} onChange={(e)=>setPasswords({...passwords,[profile.id]:e.target.value})} className={fieldClass} placeholder="Nova senha"/><button onClick={()=>resetPassword(profile)} className="rounded-lg border border-orange-700/60 px-3 text-xs font-bold text-orange-300 hover:bg-orange-500/10">Redefinir</button></div></td><td className="px-4 py-3"><button onClick={()=>changeProfile(profile,{status:profile.status === 'active' ? 'inactive' : 'active'})} className={profile.status === 'active' ? 'text-green-400' : 'text-red-400'}>{profile.status === 'active' ? 'ATIVO' : 'INATIVO'}</button></td></tr>)}{!data.profiles.length && <tr><td colSpan="6" className="p-8 text-center text-gray-500">Nenhum acesso cadastrado.</td></tr>}</tbody></table></div></article>
+    </section>}
+
+    {section === 'patrimonio' && <section className="overflow-hidden rounded-2xl border border-gray-800 bg-[#2a2a2a]"><div className="border-b border-gray-800 p-5"><h2 className="flex items-center gap-2 font-semibold text-white"><Boxes className="h-5 w-5 text-[#ff8c00]"/>Estoque e patrimônio</h2><div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-4"><input value={asset.code} onChange={(e) => setAsset({...asset,code:e.target.value})} placeholder="Código/patrimônio" className={fieldClass}/><input value={asset.name} onChange={(e) => setAsset({...asset,name:e.target.value})} placeholder="Nome do item" className={fieldClass}/><select value={asset.category} onChange={(e) => setAsset({...asset,category:e.target.value})} className={fieldClass}><option>Equipamento</option><option>Uniforme</option><option>EPI</option><option>Armamento</option><option>Veículo</option><option>Outro</option></select><input type="number" min="1" value={asset.quantity} onChange={(e) => setAsset({...asset,quantity:e.target.value})} className={fieldClass}/><select value={asset.siteId} onChange={(e) => setAsset({...asset,siteId:e.target.value})} className={fieldClass}><option value="">Posto/estoque geral</option>{data.sites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}</select><select value={asset.employeeId} onChange={(e) => setAsset({...asset,employeeId:e.target.value})} className={fieldClass}><option value="">Sem colaborador</option>{data.employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}</select><input value={asset.notes} onChange={(e) => setAsset({...asset,notes:e.target.value})} placeholder="Observações" className={fieldClass}/><Button onClick={saveAsset} className="bg-[#ff8c00] hover:bg-[#e67e00]"><Save className="mr-2 h-4 w-4"/>Cadastrar</Button></div></div><div className="overflow-x-auto"><table className="w-full min-w-[800px] text-left text-sm text-gray-400"><thead className="bg-[#1f1f1f] text-xs uppercase text-gray-500"><tr><th className="px-4 py-3">Código</th><th className="px-4 py-3">Item</th><th className="px-4 py-3">Qtd.</th><th className="px-4 py-3">Posto</th><th className="px-4 py-3">Responsável</th><th className="px-4 py-3">Status</th></tr></thead><tbody className="divide-y divide-gray-800">{data.assets.map((item) => <tr key={item.id}><td className="px-4 py-3 text-blue-300">{item.code}</td><td className="px-4 py-3"><span className="block text-white">{item.name}</span><span className="text-xs">{item.category}</span></td><td className="px-4 py-3">{item.quantity}</td><td className="px-4 py-3">{item.site_name || 'Estoque geral'}</td><td className="px-4 py-3">{item.employee_name || '—'}</td><td className="px-4 py-3"><select value={item.status} onChange={(e) => updateAsset(item,{status:e.target.value})} className={fieldClass}><option value="available">Disponível</option><option value="assigned">Entregue</option><option value="maintenance">Manutenção</option><option value="inactive">Inativo</option></select></td></tr>)}{!data.assets.length && <tr><td colSpan="6" className="p-8 text-center text-gray-500">Nenhum patrimônio cadastrado.</td></tr>}</tbody></table></div></section>}
+  </div></MainLayout></>;
+};
+
+export default CadastrosGerais;

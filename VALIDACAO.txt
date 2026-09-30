@@ -1,0 +1,22 @@
+VALIDAÇÃO LOCAL
+
+Executado com Node.js 24.19.0 e MariaDB 10.11.14.
+
+Verificações concluídas:
+- Importação do esquema SQL.
+- Primeiro acesso protegido pelo código de instalação; ativação única.
+- Login por e-mail e senha e sessão protegida.
+- Rejeição de cabeçalhos de autenticação falsificados e origem externa.
+- Cadastro de contratos e Folha de Ponto salva por competência.
+- Competências independentes e novas folhas inicialmente pendentes.
+- Upload e download de arquivo com 1,3 MB, comparação byte a byte e exclusão.
+- Exclusão de resultados preservando o status da Folha de Ponto.
+- Tarefas, mensagens e upload de documentos no Planner.
+- Carregamento administrativo do Ponto DIMIVIG.
+- CAPTCHA e cadastro administrativo de usuário no Planner.
+- Compilação das interfaces, sintaxe do servidor e referências aos assets.
+
+Não realizado:
+- Publicação na sua conta Hostinger.
+- Teste de entrega real de e-mail por SMTP, pois não foram fornecidas credenciais.
+- Transferência dos registros e anexos do ambiente Sites.

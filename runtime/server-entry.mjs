@@ -24,6 +24,24 @@ const json = (data, status = 200, headers) => Response.json(data, {status, heade
 const publicError = (message, status = 400) => json({error:message}, status);
 const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2','.pdf':'application/pdf','.ico':'image/x-icon','.wasm':'application/wasm'};
 
+function configurationError() {
+  const missing = ['APP_URL','DB_NAME','DB_USER','DB_PASSWORD'].filter(name => !process.env[name]?.trim());
+  if (missing.length) return `Preencha estas variáveis na Hostinger e reinicie a aplicação: ${missing.join(', ')}.`;
+  try {
+    const url = new URL(process.env.APP_URL);
+    if (!['http:','https:'].includes(url.protocol)) throw new Error('URL inválida');
+  } catch { return 'APP_URL deve conter o endereço completo do site, começando com https://.'; }
+  return null;
+}
+
+function databaseError(error) {
+  if (error.code === 'ER_ACCESS_DENIED_ERROR') return 'O banco recusou o acesso. Confira DB_USER e DB_PASSWORD na Hostinger e reinicie a aplicação.';
+  if (error.code === 'ER_BAD_DB_ERROR') return 'O banco informado não foi encontrado. Confira o nome completo em DB_NAME e reinicie a aplicação.';
+  if (error.code === 'ER_NO_SUCH_TABLE') return 'A estrutura do banco está incompleta. Importe GWL_NEXO_HOSTINGER_V2.sql no phpMyAdmin do banco configurado.';
+  if (['ECONNREFUSED','ENOTFOUND','ETIMEDOUT','EHOSTUNREACH'].includes(error.code)) return 'Não foi possível conectar ao banco. Confira DB_HOST e DB_PORT na Hostinger e reinicie a aplicação.';
+  return 'Não foi possível verificar o banco. Confira as variáveis e a importação do SQL; consulte o erro nos logs da aplicação.';
+}
+
 async function profile(identity) {
   if (!identity) return null;
   return env.DB.prepare('SELECT * FROM ponto_access_profiles WHERE lower(email)=lower(?) AND status=\'active\'').bind(identity.email).first();
@@ -86,8 +104,10 @@ export async function handleRequest(request) {
     if (origin && origin !== new URL(process.env.APP_URL || request.url).origin) return publicError('Origem da solicitação inválida.',403);
   }
   if (url.pathname === '/api/hostinger-status') {
+    const error = configurationError();
+    if (error) return publicError(error,503);
     try { return json({installed:await installed(),ownerEmail}); }
-    catch { return publicError('Configure as variáveis do banco e importe o arquivo SQL antes do primeiro acesso.',503); }
+    catch (error) { console.error('Falha ao verificar o banco:',error.code || error.name); return publicError(databaseError(error),503); }
   }
   if (url.pathname === '/api/hostinger-setup') return request.method === 'POST' ? setup(request) : publicError('Método não permitido.',405);
   if (url.pathname === '/api/hostinger-email') return request.method === 'POST' ? emailLink(request) : publicError('Método não permitido.',405);
@@ -147,7 +167,8 @@ export async function handleRequest(request) {
 export function createApplication() {
   return http.createServer(async(incoming,outgoing)=>{
     try {
-      const base = process.env.APP_URL || 'http://localhost:3000';
+      let base = 'http://localhost:3000';
+      try { const url = new URL(process.env.APP_URL); if (['http:','https:'].includes(url.protocol)) base=url.href; } catch {}
       if (Number(incoming.headers['content-length'] || 0) > 150*1024*1024) { outgoing.writeHead(413,{'content-type':'application/json'}); outgoing.end(JSON.stringify({error:'O arquivo excede o limite de 150 MB.'})); return; }
       const init = {method:incoming.method,headers:incoming.headers};
       if (!['GET','HEAD'].includes(incoming.method)) { init.body=Readable.toWeb(incoming);init.duplex='half'; }
@@ -161,7 +182,15 @@ export function createApplication() {
   });
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.APP_URL) { console.error('Configure DB_HOST, DB_NAME, DB_USER, DB_PASSWORD e APP_URL nas variáveis da aplicação.'); process.exit(1); }
-  createApplication().listen(Number(process.env.PORT || 3000),'0.0.0.0',()=>console.log('GWL NEXO iniciado.'));
+let application;
+export function startApplication() {
+  if (application) return application;
+  const error = configurationError();
+  if (error) console.warn('Configuração pendente:',error);
+  application=createApplication();
+  application.on('error',error=>{console.error('Falha ao iniciar servidor:',error.code || error.name);process.exitCode=1;});
+  application.listen(Number(process.env.PORT || 3000),'0.0.0.0',()=>console.log('GWL NEXO iniciado.'));
+  return application;
 }
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) startApplication();

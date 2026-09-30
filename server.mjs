@@ -1,7 +1,12 @@
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+var __esm = (fn, res, err) => function __init() {
+  if (err) throw err[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err = [e], e;
+  }
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -343,7 +348,7 @@ __export(route_exports, {
   POST: () => POST
 });
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/entity.js
+// node_modules/drizzle-orm/entity.js
 var entityKind = /* @__PURE__ */ Symbol.for("drizzle:entityKind");
 function is(value, type) {
   if (!value || typeof value !== "object") {
@@ -369,7 +374,7 @@ function is(value, type) {
   return false;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/column.js
+// node_modules/drizzle-orm/column.js
 var Column = class {
   constructor(table, config) {
     this.table = table;
@@ -420,7 +425,7 @@ var Column = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/column-builder.js
+// node_modules/drizzle-orm/column-builder.js
 var ColumnBuilder = class {
   static [entityKind] = "ColumnBuilder";
   config;
@@ -523,10 +528,10 @@ var ColumnBuilder = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/table.utils.js
+// node_modules/drizzle-orm/table.utils.js
 var TableName = /* @__PURE__ */ Symbol.for("drizzle:Name");
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/foreign-keys.js
+// node_modules/drizzle-orm/pg-core/foreign-keys.js
 var ForeignKeyBuilder = class {
   static [entityKind] = "PgForeignKeyBuilder";
   /** @internal */
@@ -583,12 +588,12 @@ var ForeignKey = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/tracing-utils.js
+// node_modules/drizzle-orm/tracing-utils.js
 function iife(fn, ...args) {
   return fn(...args);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/unique-constraint.js
+// node_modules/drizzle-orm/pg-core/unique-constraint.js
 function uniqueKeyName(table, columns) {
   return `${table[TableName]}_${columns.join("_")}_unique`;
 }
@@ -638,7 +643,7 @@ var UniqueConstraint = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/utils/array.js
+// node_modules/drizzle-orm/pg-core/utils/array.js
 function parsePgArrayValue(arrayString, startFrom, inQuotes) {
   for (let i = startFrom; i < arrayString.length; i++) {
     const char = arrayString[i];
@@ -714,7 +719,7 @@ function makePgArray(array) {
   }).join(",")}}`;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/columns/common.js
+// node_modules/drizzle-orm/pg-core/columns/common.js
 var PgColumnBuilder = class extends ColumnBuilder {
   foreignKeyConfigs = [];
   static [entityKind] = "PgColumnBuilder";
@@ -898,7 +903,7 @@ var PgArray = class _PgArray extends PgColumn {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/columns/enum.js
+// node_modules/drizzle-orm/pg-core/columns/enum.js
 var PgEnumObjectColumnBuilder = class extends PgColumnBuilder {
   static [entityKind] = "PgEnumObjectColumnBuilder";
   constructor(name, enumInstance) {
@@ -956,7 +961,7 @@ var PgEnumColumn = class extends PgColumn {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/subquery.js
+// node_modules/drizzle-orm/subquery.js
 var Subquery = class {
   static [entityKind] = "Subquery";
   constructor(sql2, fields, alias, isWith = false, usedTables = []) {
@@ -977,10 +982,10 @@ var WithSubquery = class extends Subquery {
   static [entityKind] = "WithSubquery";
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/version.js
+// node_modules/drizzle-orm/version.js
 var version = "0.45.2";
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/tracing.js
+// node_modules/drizzle-orm/tracing.js
 var otel;
 var rawTracer;
 var tracer = {
@@ -1015,10 +1020,10 @@ var tracer = {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/view-common.js
+// node_modules/drizzle-orm/view-common.js
 var ViewBaseConfig = /* @__PURE__ */ Symbol.for("drizzle:ViewBaseConfig");
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/table.js
+// node_modules/drizzle-orm/table.js
 var Schema = /* @__PURE__ */ Symbol.for("drizzle:Schema");
 var Columns = /* @__PURE__ */ Symbol.for("drizzle:Columns");
 var ExtraConfigColumns = /* @__PURE__ */ Symbol.for("drizzle:ExtraConfigColumns");
@@ -1080,7 +1085,7 @@ function getTableUniqueName(table) {
   return `${table[Schema] ?? "public"}.${table[TableName]}`;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sql/sql.js
+// node_modules/drizzle-orm/sql/sql.js
 var FakePrimitiveParam = class {
   static [entityKind] = "FakePrimitiveParam";
 };
@@ -1474,7 +1479,7 @@ Subquery.prototype.getSQL = function() {
   return new SQL([this]);
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/alias.js
+// node_modules/drizzle-orm/alias.js
 var ColumnAliasProxyHandler = class {
   constructor(table) {
     this.table = table;
@@ -1570,7 +1575,7 @@ function mapColumnsInSQLToAlias(query, alias) {
   }));
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/errors.js
+// node_modules/drizzle-orm/errors.js
 var DrizzleError = class extends Error {
   static [entityKind] = "DrizzleError";
   constructor({ message, cause }) {
@@ -1597,7 +1602,7 @@ var TransactionRollbackError = class extends DrizzleError {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/logger.js
+// node_modules/drizzle-orm/logger.js
 var ConsoleLogWriter = class {
   static [entityKind] = "ConsoleLogWriter";
   write(message) {
@@ -1628,7 +1633,7 @@ var NoopLogger = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/query-promise.js
+// node_modules/drizzle-orm/query-promise.js
 var QueryPromise = class {
   static [entityKind] = "QueryPromise";
   [Symbol.toStringTag] = "QueryPromise";
@@ -1652,7 +1657,7 @@ var QueryPromise = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/utils.js
+// node_modules/drizzle-orm/utils.js
 function mapResultRow(columns, row, joinsNotNullableMap) {
   const nullifyMap = {};
   const result = columns.reduce(
@@ -1768,7 +1773,7 @@ function getColumnNameAndConfig(a, b) {
 }
 var textDecoder = typeof TextDecoder === "undefined" ? null : new TextDecoder();
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/table.js
+// node_modules/drizzle-orm/pg-core/table.js
 var InlineForeignKeys = /* @__PURE__ */ Symbol.for("drizzle:PgInlineForeignKeys");
 var EnableRLS = /* @__PURE__ */ Symbol.for("drizzle:EnableRLS");
 var PgTable = class extends Table {
@@ -1788,7 +1793,7 @@ var PgTable = class extends Table {
   [Table.Symbol.ExtraConfigColumns] = {};
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/pg-core/primary-keys.js
+// node_modules/drizzle-orm/pg-core/primary-keys.js
 var PrimaryKeyBuilder = class {
   static [entityKind] = "PgPrimaryKeyBuilder";
   /** @internal */
@@ -1818,7 +1823,7 @@ var PrimaryKey = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sql/expressions/conditions.js
+// node_modules/drizzle-orm/sql/expressions/conditions.js
 function bindIfParam(value, column) {
   if (isDriverValueEncoder(column) && !isSQLWrapper(value) && !is(value, Param) && !is(value, Placeholder) && !is(value, Column) && !is(value, Table) && !is(value, View)) {
     return new Param(value, column);
@@ -1933,7 +1938,7 @@ function notIlike(column, value) {
   return sql`${column} not ilike ${value}`;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sql/expressions/select.js
+// node_modules/drizzle-orm/sql/expressions/select.js
 function asc(column) {
   return sql`${column} asc`;
 }
@@ -1941,7 +1946,7 @@ function desc(column) {
   return sql`${column} desc`;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/relations.js
+// node_modules/drizzle-orm/relations.js
 var Relation = class {
   constructor(sourceTable, referencedTable, relationName) {
     this.sourceTable = sourceTable;
@@ -2202,7 +2207,7 @@ function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelect
   return result;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/selection-proxy.js
+// node_modules/drizzle-orm/selection-proxy.js
 var SelectionProxyHandler = class _SelectionProxyHandler {
   static [entityKind] = "SelectionProxyHandler";
   config;
@@ -2270,7 +2275,7 @@ var SelectionProxyHandler = class _SelectionProxyHandler {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/foreign-keys.js
+// node_modules/drizzle-orm/sqlite-core/foreign-keys.js
 var ForeignKeyBuilder2 = class {
   static [entityKind] = "SQLiteForeignKeyBuilder";
   /** @internal */
@@ -2327,7 +2332,7 @@ var ForeignKey2 = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/unique-constraint.js
+// node_modules/drizzle-orm/sqlite-core/unique-constraint.js
 function uniqueKeyName2(table, columns) {
   return `${table[TableName]}_${columns.join("_")}_unique`;
 }
@@ -2369,7 +2374,7 @@ var UniqueConstraint2 = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/common.js
+// node_modules/drizzle-orm/sqlite-core/columns/common.js
 var SQLiteColumnBuilder = class extends ColumnBuilder {
   static [entityKind] = "SQLiteColumnBuilder";
   foreignKeyConfigs = [];
@@ -2420,7 +2425,7 @@ var SQLiteColumn = class extends Column {
   static [entityKind] = "SQLiteColumn";
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/blob.js
+// node_modules/drizzle-orm/sqlite-core/columns/blob.js
 var SQLiteBigIntBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteBigIntBuilder";
   constructor(name) {
@@ -2509,7 +2514,7 @@ function blob(a, b) {
   return new SQLiteBlobBufferBuilder(name);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/custom.js
+// node_modules/drizzle-orm/sqlite-core/columns/custom.js
 var SQLiteCustomColumnBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteCustomColumnBuilder";
   constructor(name, fieldConfig, customTypeParams) {
@@ -2557,7 +2562,7 @@ function customType(customTypeParams) {
   };
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/integer.js
+// node_modules/drizzle-orm/sqlite-core/columns/integer.js
 var SQLiteBaseIntegerBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteBaseIntegerBuilder";
   constructor(name, dataType, columnType) {
@@ -2666,7 +2671,7 @@ function integer(a, b) {
   return new SQLiteIntegerBuilder(name);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/numeric.js
+// node_modules/drizzle-orm/sqlite-core/columns/numeric.js
 var SQLiteNumericBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteNumericBuilder";
   constructor(name) {
@@ -2741,7 +2746,7 @@ function numeric(a, b) {
   return mode === "number" ? new SQLiteNumericNumberBuilder(name) : mode === "bigint" ? new SQLiteNumericBigIntBuilder(name) : new SQLiteNumericBuilder(name);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/real.js
+// node_modules/drizzle-orm/sqlite-core/columns/real.js
 var SQLiteRealBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteRealBuilder";
   constructor(name) {
@@ -2762,7 +2767,7 @@ function real(name) {
   return new SQLiteRealBuilder(name ?? "");
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/text.js
+// node_modules/drizzle-orm/sqlite-core/columns/text.js
 var SQLiteTextBuilder = class extends SQLiteColumnBuilder {
   static [entityKind] = "SQLiteTextBuilder";
   constructor(name, config) {
@@ -2822,7 +2827,7 @@ function text(a, b = {}) {
   return new SQLiteTextBuilder(name, config);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/columns/all.js
+// node_modules/drizzle-orm/sqlite-core/columns/all.js
 function getSQLiteColumnBuilders() {
   return {
     blob,
@@ -2834,7 +2839,7 @@ function getSQLiteColumnBuilders() {
   };
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/table.js
+// node_modules/drizzle-orm/sqlite-core/table.js
 var InlineForeignKeys2 = /* @__PURE__ */ Symbol.for("drizzle:SQLiteInlineForeignKeys");
 var SQLiteTable = class extends Table {
   static [entityKind] = "SQLiteTable";
@@ -2873,7 +2878,7 @@ var sqliteTable = (name, columns, extraConfig) => {
   return sqliteTableBase(name, columns, extraConfig);
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/indexes.js
+// node_modules/drizzle-orm/sqlite-core/indexes.js
 var IndexBuilderOn = class {
   constructor(name, unique) {
     this.name = name;
@@ -2922,7 +2927,7 @@ function uniqueIndex(name) {
   return new IndexBuilderOn(name, true);
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/utils.js
+// node_modules/drizzle-orm/sqlite-core/utils.js
 function extractUsedTable(table) {
   if (is(table, SQLiteTable)) {
     return [`${table[Table.Symbol.BaseName]}`];
@@ -2936,7 +2941,7 @@ function extractUsedTable(table) {
   return [];
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/delete.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/delete.js
 var SQLiteDeleteBase = class extends QueryPromise {
   constructor(table, session, dialect, withList) {
     super();
@@ -3050,7 +3055,7 @@ var SQLiteDeleteBase = class extends QueryPromise {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/casing.js
+// node_modules/drizzle-orm/casing.js
 function toSnakeCase(input) {
   const words = input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? [];
   return words.map((word) => word.toLowerCase()).join("_");
@@ -3102,12 +3107,12 @@ var CasingCache = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/view-base.js
+// node_modules/drizzle-orm/sqlite-core/view-base.js
 var SQLiteViewBase = class extends View {
   static [entityKind] = "SQLiteViewBase";
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/dialect.js
+// node_modules/drizzle-orm/sqlite-core/dialect.js
 var SQLiteDialect = class {
   static [entityKind] = "SQLiteDialect";
   /** @internal */
@@ -3797,7 +3802,7 @@ var SQLiteAsyncDialect = class extends SQLiteDialect {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/query-builders/query-builder.js
+// node_modules/drizzle-orm/query-builders/query-builder.js
 var TypedQueryBuilder = class {
   static [entityKind] = "TypedQueryBuilder";
   /** @internal */
@@ -3806,7 +3811,7 @@ var TypedQueryBuilder = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/select.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/select.js
 var SQLiteSelectBuilder = class {
   static [entityKind] = "SQLiteSelectBuilder";
   fields;
@@ -4471,7 +4476,7 @@ var unionAll = createSetOperator("union", true);
 var intersect = createSetOperator("intersect", false);
 var except = createSetOperator("except", false);
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/query-builder.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/query-builder.js
 var QueryBuilder = class {
   static [entityKind] = "SQLiteQueryBuilder";
   dialect;
@@ -4539,7 +4544,7 @@ var QueryBuilder = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/insert.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/insert.js
 var SQLiteInsertBuilder = class {
   constructor(table, session, dialect, withList) {
     this.table = table;
@@ -4712,7 +4717,7 @@ var SQLiteInsertBase = class extends QueryPromise {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/update.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/update.js
 var SQLiteUpdateBuilder = class {
   constructor(table, session, dialect, withList) {
     this.table = table;
@@ -4878,7 +4883,7 @@ var SQLiteUpdateBase = class extends QueryPromise {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/count.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/count.js
 var SQLiteCountBuilder = class _SQLiteCountBuilder extends SQL {
   constructor(params) {
     super(_SQLiteCountBuilder.buildEmbeddedCount(params.source, params.filters).queryChunks);
@@ -4922,7 +4927,7 @@ var SQLiteCountBuilder = class _SQLiteCountBuilder extends SQL {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/query.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/query.js
 var RelationalQueryBuilder = class {
   constructor(mode, fullSchema, schema, tableNamesMap, table, tableConfig, dialect, session) {
     this.mode = mode;
@@ -5066,7 +5071,7 @@ var SQLiteSyncRelationalQuery = class extends SQLiteRelationalQuery {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/query-builders/raw.js
+// node_modules/drizzle-orm/sqlite-core/query-builders/raw.js
 var SQLiteRaw = class extends QueryPromise {
   constructor(execute, getSQL, action, dialect, mapBatchResult) {
     super();
@@ -5094,7 +5099,7 @@ var SQLiteRaw = class extends QueryPromise {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/db.js
+// node_modules/drizzle-orm/sqlite-core/db.js
 var BaseSQLiteDatabase = class {
   constructor(resultKind, dialect, session, schema) {
     this.resultKind = resultKind;
@@ -5385,7 +5390,7 @@ var BaseSQLiteDatabase = class {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/cache/core/cache.js
+// node_modules/drizzle-orm/cache/core/cache.js
 var Cache = class {
   static [entityKind] = "Cache";
 };
@@ -5412,7 +5417,7 @@ async function hashQuery(sql2, params) {
   return hashHex;
 }
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/sqlite-core/session.js
+// node_modules/drizzle-orm/sqlite-core/session.js
 var ExecuteResultSync = class extends QueryPromise {
   constructor(resultCb) {
     super();
@@ -5608,7 +5613,7 @@ var SQLiteTransaction = class extends BaseSQLiteDatabase {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/d1/session.js
+// node_modules/drizzle-orm/d1/session.js
 var SQLiteD1Session = class extends SQLiteSession {
   constructor(client, dialect, schema, options = {}) {
     super(dialect);
@@ -5791,7 +5796,7 @@ var D1PreparedQuery = class extends SQLitePreparedQuery {
   }
 };
 
-// ../../../sites/gwl-central/node_modules/drizzle-orm/d1/driver.js
+// node_modules/drizzle-orm/d1/driver.js
 var DrizzleD1Database = class extends BaseSQLiteDatabase {
   static [entityKind] = "D1Database";
   async batch(batch) {
@@ -8627,6 +8632,24 @@ var ownerEmail2 = (process.env.OWNER_EMAIL || "dimivigia@gmail.com").trim().toLo
 var json = (data, status = 200, headers2) => Response.json(data, { status, headers: headers2 });
 var publicError = (message, status = 400) => json({ error: message }, status);
 var mime = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".woff2": "font/woff2", ".pdf": "application/pdf", ".ico": "image/x-icon", ".wasm": "application/wasm" };
+function configurationError() {
+  const missing = ["APP_URL", "DB_NAME", "DB_USER", "DB_PASSWORD"].filter((name) => !process.env[name]?.trim());
+  if (missing.length) return `Preencha estas vari\xE1veis na Hostinger e reinicie a aplica\xE7\xE3o: ${missing.join(", ")}.`;
+  try {
+    const url = new URL(process.env.APP_URL);
+    if (!["http:", "https:"].includes(url.protocol)) throw new Error("URL inv\xE1lida");
+  } catch {
+    return "APP_URL deve conter o endere\xE7o completo do site, come\xE7ando com https://.";
+  }
+  return null;
+}
+function databaseError(error) {
+  if (error.code === "ER_ACCESS_DENIED_ERROR") return "O banco recusou o acesso. Confira DB_USER e DB_PASSWORD na Hostinger e reinicie a aplica\xE7\xE3o.";
+  if (error.code === "ER_BAD_DB_ERROR") return "O banco informado n\xE3o foi encontrado. Confira o nome completo em DB_NAME e reinicie a aplica\xE7\xE3o.";
+  if (error.code === "ER_NO_SUCH_TABLE") return "A estrutura do banco est\xE1 incompleta. Importe GWL_NEXO_HOSTINGER_V2.sql no phpMyAdmin do banco configurado.";
+  if (["ECONNREFUSED", "ENOTFOUND", "ETIMEDOUT", "EHOSTUNREACH"].includes(error.code)) return "N\xE3o foi poss\xEDvel conectar ao banco. Confira DB_HOST e DB_PORT na Hostinger e reinicie a aplica\xE7\xE3o.";
+  return "N\xE3o foi poss\xEDvel verificar o banco. Confira as vari\xE1veis e a importa\xE7\xE3o do SQL; consulte o erro nos logs da aplica\xE7\xE3o.";
+}
 async function profile(identity) {
   if (!identity) return null;
   return env.DB.prepare("SELECT * FROM ponto_access_profiles WHERE lower(email)=lower(?) AND status='active'").bind(identity.email).first();
@@ -8704,10 +8727,13 @@ async function handleRequest(request) {
     if (origin && origin !== new URL(process.env.APP_URL || request.url).origin) return publicError("Origem da solicita\xE7\xE3o inv\xE1lida.", 403);
   }
   if (url.pathname === "/api/hostinger-status") {
+    const error = configurationError();
+    if (error) return publicError(error, 503);
     try {
       return json({ installed: await installed(), ownerEmail: ownerEmail2 });
-    } catch {
-      return publicError("Configure as vari\xE1veis do banco e importe o arquivo SQL antes do primeiro acesso.", 503);
+    } catch (error2) {
+      console.error("Falha ao verificar o banco:", error2.code || error2.name);
+      return publicError(databaseError(error2), 503);
     }
   }
   if (url.pathname === "/api/hostinger-setup") return request.method === "POST" ? setup(request) : publicError("M\xE9todo n\xE3o permitido.", 405);
@@ -8771,7 +8797,12 @@ async function handleRequest(request) {
 function createApplication() {
   return http.createServer(async (incoming, outgoing) => {
     try {
-      const base = process.env.APP_URL || "http://localhost:3000";
+      let base = "http://localhost:3000";
+      try {
+        const url = new URL(process.env.APP_URL);
+        if (["http:", "https:"].includes(url.protocol)) base = url.href;
+      } catch {
+      }
       if (Number(incoming.headers["content-length"] || 0) > 150 * 1024 * 1024) {
         outgoing.writeHead(413, { "content-type": "application/json" });
         outgoing.end(JSON.stringify({ error: "O arquivo excede o limite de 150 MB." }));
@@ -8798,15 +8829,23 @@ function createApplication() {
     }
   });
 }
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.APP_URL) {
-    console.error("Configure DB_HOST, DB_NAME, DB_USER, DB_PASSWORD e APP_URL nas vari\xE1veis da aplica\xE7\xE3o.");
-    process.exit(1);
-  }
-  createApplication().listen(Number(process.env.PORT || 3e3), "0.0.0.0", () => console.log("GWL NEXO iniciado."));
+var application;
+function startApplication() {
+  if (application) return application;
+  const error = configurationError();
+  if (error) console.warn("Configura\xE7\xE3o pendente:", error);
+  application = createApplication();
+  application.on("error", (error2) => {
+    console.error("Falha ao iniciar servidor:", error2.code || error2.name);
+    process.exitCode = 1;
+  });
+  application.listen(Number(process.env.PORT || 3e3), "0.0.0.0", () => console.log("GWL NEXO iniciado."));
+  return application;
 }
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) startApplication();
 export {
   createApplication,
   handleRequest,
-  pool
+  pool,
+  startApplication
 };

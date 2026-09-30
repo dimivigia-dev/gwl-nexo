@@ -15,6 +15,17 @@ Verificações concluídas:
 - Carregamento administrativo do Ponto DIMIVIG.
 - CAPTCHA e cadastro administrativo de usuário no Planner.
 - Compilação das interfaces, sintaxe do servidor e referências aos assets.
+- Instalação limpa com npm ci e lockfile sem referências a pastas locais.
+- Entrada server.cjs carregada por require em outro processo inicia o servidor.
+- Inicialização repetida retorna o mesmo servidor.
+- Página, instalação e assets disponíveis com configuração do banco pendente.
+- Mensagens específicas para variáveis ausentes, APP_URL inválida, conexão
+  recusada, senha incorreta e estrutura SQL incompleta; senhas não aparecem
+  nos retornos nem nos logs desses casos.
+- SQL V2 importado com uma conexão nova por comando e chaves estrangeiras
+  ativas: 35 tabelas e 23 vínculos. Importação parcial e repetida preserva
+  contratos, Folha de Ponto e ativação. Referências inválidas são rejeitadas
+  e exclusões em cascata funcionam.
 
 Não realizado:
 - Publicação na sua conta Hostinger.

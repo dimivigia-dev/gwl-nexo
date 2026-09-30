@@ -3,11 +3,12 @@
   "version": "2.0.80",
   "private": true,
   "type": "module",
+  "main": "server.cjs",
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env server.mjs",
+    "start": "node --env-file-if-exists=.env server.cjs",
     "build": "node scripts/verify-package.mjs",
     "rebuild": "node scripts/rebuild.mjs"
   },

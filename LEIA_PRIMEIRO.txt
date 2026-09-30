@@ -10,10 +10,10 @@ precisam do servidor Node.js.
 
 1. Crie um banco MySQL/MariaDB e um usuário no hPanel.
 2. Abra o phpMyAdmin desse banco e importe:
-   banco_sql/GWL_NEXO_estrutura.sql
+   banco_sql/GWL_NEXO_HOSTINGER_V2.sql
 3. Cadastre as variáveis abaixo na configuração da aplicação:
    APP_URL: endereço completo do site com HTTPS, sem barra final.
-   DB_HOST: endereço do servidor do banco informado pela Hostinger.
+   DB_HOST: localhost para banco na mesma hospedagem Hostinger.
    DB_PORT: normalmente 3306.
    DB_NAME: nome do banco criado.
    DB_USER: usuário do banco.
@@ -27,7 +27,8 @@ precisam do servidor Node.js.
    Versão Node.js: 24.x.
    Comando de build: npm run build.
    Comando de início: npm start.
-   Arquivo de entrada, se solicitado: server.mjs.
+   Diretório de saída, se solicitado: . (raiz).
+   Arquivo de entrada, se solicitado: server.cjs.
    Não selecione publicação apenas estática.
 5. Publique a aplicação e abra https://SEU-DOMINIO/instalar.
 6. Informe o nome do administrador, o INSTALL_TOKEN configurado e uma senha
@@ -65,6 +66,15 @@ Em um VPS, copie .env.example para .env e preencha os valores antes de npm start
 No hPanel, prefira as variáveis da aplicação; não envie senhas no código-fonte.
 Para alterar e recompilar o código: npm install --include=dev; npm run rebuild.
 O comando normal npm run build verifica os arquivos que já estão compilados.
+Ao atualizar dependências, atualize também package-lock.json.
+
+ERROS DE INSTALAÇÃO
+- Tela genérica 503: confira server.cjs, framework Other, Node.js 24 e saída .;
+  faça nova implantação e consulte os logs de execução se o erro continuar.
+- Abra /instalar para conferir mensagens específicas da configuração do banco.
+- SQL V2 cria as tabelas referenciadas antes das dependentes e não apaga dados.
+- Se o erro 1005/150 continuar, clique em Detalhes no phpMyAdmin. Confira também
+  SHOW CREATE TABLE contract_catalog; na aba SQL, sem excluir as tabelas.
 
 REQUISITOS E REFERÊNCIAS
 Node.js 24; banco MariaDB 10.6+ ou MySQL 8.0.13+; domínio com HTTPS.
